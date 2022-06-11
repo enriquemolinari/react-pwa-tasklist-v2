@@ -142,7 +142,5 @@ export let tasks = (function () {
     addNew: add,
     getAllQueued: getAllQueued,
     deleteAllQueued: deleteAllQueued,
-    /*count: count,
-    refreshFromServer: refresh,*/
   };
 })();
