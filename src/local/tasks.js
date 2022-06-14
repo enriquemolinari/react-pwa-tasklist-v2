@@ -131,6 +131,20 @@ export let tasks = (function () {
     });
   }
 
+  async function startFromServer() {
+    let all = await tasksService.retrieveAll();
+    let promisesAdd = [];
+    let db = await openIndexedDb();
+    let tx = db.transaction([STORE_DB, STORE_QUEUE], "readwrite");
+    tx.objectStore(STORE_DB).clear();
+    tx.objectStore(STORE_QUEUE).clear();
+    all.tasks.forEach((task) => {
+      promisesAdd.push(tx.objectStore(STORE_DB).add(task));
+    });
+    await Promise.all(promisesAdd);
+    return tx.done;
+  }
+
   function uid() {
     return Date.now().toString(36) + Math.random().toString(36).substring(2);
   }
@@ -142,5 +156,6 @@ export let tasks = (function () {
     addNew: add,
     getAllQueued: getAllQueued,
     deleteAllQueued: deleteAllQueued,
+    startFromServer: startFromServer,
   };
 })();
