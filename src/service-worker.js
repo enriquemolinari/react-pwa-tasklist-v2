@@ -110,9 +110,25 @@ async function doSync(event) {
   console.log("it was executed...", event);
   if (event.tag === "sync-queued-data") {
     let all = await tasksLocalService.getAllQueued();
-    return syncServer.bulkTasks(all).then(() => {
-      return tasksLocalService.deleteAllQueued();
-    });
+    return syncServer
+      .bulkTasks(all)
+      .then(() => {
+        return tasksLocalService.deleteAllQueued();
+      })
+      .catch((e) => {
+        self.clients.matchAll().then(function (clients) {
+          if (clients && clients.length) {
+            clients.forEach((client) => {
+              client.postMessage({
+                type: "SYNC_ERROR",
+                msg: e.msg,
+                lastChance: event.lastChance,
+              });
+            });
+          }
+        });
+        return Promise.reject();
+      });
   }
 }
 

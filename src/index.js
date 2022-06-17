@@ -34,6 +34,19 @@ navigator.serviceWorker.addEventListener("controllerchange", () => {
   window.location.reload();
 });
 
+navigator.serviceWorker.addEventListener("message", (event) => {
+  if (event.data.type === "SYNC_ERROR") {
+    toast.error(
+      "Something went wrong with the sync service: " + event.data.msg
+    );
+    if (event.data.lastChance) {
+      navigator.serviceWorker.ready.then((reg) => {
+        reg.sync.register("sync-queued-data");
+      });
+    }
+  }
+});
+
 const container = document.getElementById("root");
 const root = createRoot(container);
 
